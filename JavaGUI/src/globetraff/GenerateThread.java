@@ -68,10 +68,10 @@ public class GenerateThread extends Thread {
         r = Runtime.getRuntime();
         String  dir = exec("pwd")+"/";
 
-        //System.out.println(dir);
+        System.out.println(dir);
 
-        //System.out.println("Preparing generator...");
-        //exec("../setup");
+        System.out.println("Preparing generator...");
+        // exec("../setup");
 
         exec("./cleanup");
 
