@@ -5,7 +5,6 @@ GlobeTraff is a traffic workload generator for the creation of synthetic traffic
 
 
 # How to install GlobeTraff
- the extended ProwGen code and it can be compiled by simply running the "setup" script. 
 
 **1. Run the "setup" script in the project root directory**
 
@@ -21,4 +20,8 @@ Directly build & run the project. If no errors are thrown, you should see the fo
 
 
 # How to use GlobeTraff
+
+Simply djust the knob to set the parameter to the value you want, then you click the "Generate" button. After that, you will see the workload file in JavaGUI/data.
+
+
 
