@@ -86,6 +86,10 @@ public class GenerateThread extends Thread {
         //exec(prepareCommand(FREQSIZE, dir)); //exec("./freqsize < data/default.web > data/docs.web");
         exec("./freq");
 
+
+        // It will execute ./numWebRequests and ./numWebDocs first.
+        // command: ./lrustack $dir $pop_bias $stacksize $numWebRequests $numWebDocs $stackmode stack.dat > data/workload.tmp
+        // stack.dat is in the root directory: It should be ../stack.dat
         System.out.println(prepareCommand(LRUSTACK, dir));
         writeToFile("lrustack",prepareCommand(LRUSTACK, dir)); //exec("./lrustack \"stack.dat\" 0.20 100 30 30 1 > data/default.tmp");
         exec("./lrustack");
@@ -154,7 +158,7 @@ public class GenerateThread extends Thread {
                           exec("./numWebRequests") + " " +
                           exec("./numWebDocs") + " " +
                           this.stackmode  + " " +
-                          "stack.dat > data/workload.tmp";
+                          "../stack.dat > data/workload.tmp";
                 break;
             }
             default:
