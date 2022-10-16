@@ -12,6 +12,7 @@ echo Making executables in root directory
 echo
 make clean
 make 
+# ------------------- ok
 
 cd prowgen
 echo 
@@ -20,28 +21,35 @@ echo
 make clean
 make
 cp ProWGen .. 
+# ------------------- ok
 
 cd ../webproxysim 
 echo 
 echo Making CacheDriver
 echo 
+make clean
 make
 cp CacheDriver .. 
+# ------------------- ok
 
 cd ../pop
 echo
 echo Making popularity 
 echo 
+make clean
 make 
 cp popularity ..
+# ------------------- ok
 
 cd ../locality 
 echo 
 echo Making lrustack and freqsize
 echo
+make clean
 make
 cp lrustack .. 
 cp freqsize .. 
+
 
 cd ..
 

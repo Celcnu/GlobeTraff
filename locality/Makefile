@@ -9,4 +9,4 @@ lrustack: lrustack.h availdocs.h lrustack.cpp availdocs.cpp main.cpp
 	g++ -o lrustack lrustack.o availdocs.o main.o ../prowgen/distributions.o -lm 
 
 clean:
-	rm *~ *.o lrustack freqsize
+	rm -f *.o lrustack freqsize
