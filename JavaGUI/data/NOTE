@@ -1,0 +1,6 @@
+This directory needs to be kept, otherwise an error will be reported during execution.
+For example:
+- Executing: ./cleanup
+- Exit value = 1
+- rm: cannot remove 'data/workload.*': No such file or directory
+- rm: cannot remove 'data/docs.*': No such file or director

@@ -23,5 +23,12 @@ Directly build & run the project. If no errors are thrown, you should see the fo
 
 Simply djust the knob to set the parameter to the value you want, then you click the "Generate" button. After that, you will see the workload file in JavaGUI/data.
 
+# Bugfix
+A.  "Permission denied" error
+- ./freq: 1: ../freqsize: Permission denied
+- ./numWebRequests: 1: ../lc.pl: Permission denied
+- ...
+- Add execution permissions to the corresponding files, for example, "chmod +x ../lc.pl" under path JavaGUI/
+
 
 
