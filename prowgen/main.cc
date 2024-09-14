@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 	
 	
 	float web_traffic_size = web_perc*workloadSize;
-	float p2p_traffic_size = p2p_perc*workloadSize; l
+	float p2p_traffic_size = p2p_perc*workloadSize;
 	printf("p2p_traffic_size = %f MB\n",p2p_traffic_size/(1024*1024));
 	float video_traffic_size = video_perc*workloadSize;
 	float other_traffic_size = other_perc*workloadSize;
