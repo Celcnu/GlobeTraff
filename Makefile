@@ -60,7 +60,7 @@ variance: variance.c
 
 clean: 
 	rm -rf autocorr avg buckets bytesperinterval col2 col3 get_time hist \
-histogram iat linreg logtrans lrusd number reqsperinterval rnd rs rs_x rs_y \
+histogram iat linreg logtrans lrusd lrustack ProWGen number reqsperinterval rnd rs rs_x rs_y \
 strip strip_col12  strip_col2 strip_col3 variance avgpop body lrg iat2
 
 

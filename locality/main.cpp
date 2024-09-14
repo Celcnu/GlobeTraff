@@ -127,13 +127,14 @@ char *webDocsFile;
 	
 //begin main()
 int main(int argc, char **argv) {
+	// printf("lrustack main()\n");
    
-        if (argc != 8) {
-                printf("Usage: lrustack probabilities_file fudge_factor L M N > output_file\n");
-                exit(-1);
-        }
+	if (argc != 8) {
+			printf("Usage: lrustack probabilities_file fudge_factor L M N > output_file\n");
+			exit(-1);
+	}
 
-	fudge_factor = atof(argv[2]);        //Probability bias
+	fudge_factor = atof(argv[2]);        //Probability bias 概率偏差? GUI的标注是错的
 	L = atoi(argv[3]);
 	M = atoll(argv[4]);
 	N = atoll(argv[5]);
@@ -154,47 +155,50 @@ int main(int argc, char **argv) {
 	strcpy(webDocsFile, dataDir);  //1
 	strcat(webDocsFile, "docs.web"); 	
 
+	// 内存分配
 	if ((stackDepthProb = (float *) malloc(L * sizeof(float))) == NULL) { 
-                printf("Cannot allocate memory for stackDepthProb\n");
-                exit(-1);
+		printf("Cannot allocate memory for stackDepthProb\n");
+		exit(-1);
 	}	
-        if ((docNames = (int *) malloc(N * sizeof(int ))) == NULL) {
-                printf("Cannot allocate memory for docNames\n");
-                exit(-1);
-        }
-        if ((docFreqs = (int *) malloc(N * sizeof(int ))) == NULL) {
-                printf("Cannot allocate memory for docFreqs\n");
-                exit(-1);
-        }
-        if ((docSizes = (int *) malloc(N * sizeof(int ))) == NULL) {
-                printf("Cannot allocate memory for docSizes\n");
-                exit(-1);
-        }
-        if ((refStream = (int *) malloc(M * sizeof(int ))) == NULL) {
-                printf("Cannot allocate memory for refStream\n");
-                exit(-1);
-        }
-        if ((docTimest = (float *) malloc(N * sizeof(int ))) == NULL) {
-                printf("Cannot allocate memory for docTimest\n");
-                exit(-1);
-        }
+	if ((docNames = (int *) malloc(N * sizeof(int ))) == NULL) {
+		printf("Cannot allocate memory for docNames\n");
+		exit(-1);
+	}
+	if ((docFreqs = (int *) malloc(N * sizeof(int ))) == NULL) {
+		printf("Cannot allocate memory for docFreqs\n");
+		exit(-1);
+	}
+	if ((docSizes = (int *) malloc(N * sizeof(int ))) == NULL) {
+		printf("Cannot allocate memory for docSizes\n");
+		exit(-1);
+	}
+	if ((refStream = (int *) malloc(M * sizeof(int ))) == NULL) {
+		printf("Cannot allocate memory for refStream\n");
+		exit(-1);
+	}
+	if ((docTimest = (float *) malloc(N * sizeof(int ))) == NULL) {
+		printf("Cannot allocate memory for docTimest\n");
+		exit(-1);
+	}
 
-        docRefPtr = refStream;
+	docRefPtr = refStream; // 表示请求流???
 
 
 	// read given data file into global array:
 	// docNames[],docFreqs[]
-	readDocs();
+	readDocs(); // 此时还只有请求数量, 没有时戳!
 
 	//create and initialize availible docments object
 	avaDocs = new availdocs(N,M);
 	avaDocs->init(docNames,docFreqs);
 
+	// printf("lrustack mode: %d\n", Mode);
+
     // create and initialize LRU Stack based on Model
     // for independent model
 	if (Mode==0) {
-		stack1 = new lrustack(N,Mode);
-		stack1->init(M,docNames,docFreqs);
+		stack1 = new lrustack(N,Mode); // TODO LRU堆栈???
+		stack1->init(M,docNames,docFreqs); // M是总的请求数
 	}
     // for static model
 	else if (Mode==1){
@@ -220,16 +224,16 @@ int main(int argc, char **argv) {
 
 	distributions = new Distributions();
 	
-   //process the reference requests 
-   process();
+	//process the reference requests 
+	process();
 
-   //print the generated reference series
-   outputRef();
-        free(docNames);
-        free(docTimest);
-        free(docSizes);
-        free(docFreqs);
-        free(refStream);
+	//print the generated reference series
+	outputRef();
+	free(docNames);
+	free(docTimest);
+	free(docSizes);
+	free(docFreqs);
+	free(refStream);
 	free(stackDepthProb); 
 
 	delete dataDir;

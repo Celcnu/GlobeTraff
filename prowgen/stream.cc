@@ -78,6 +78,7 @@ RequestWebStream::RequestWebStream(char* initRequestStreamFile,
 	zipfSlope	 		= initzipfSlope;
 	paretoTailIndex     = initparetoTailIndex;
 	totalNoofRequests 	= initTotalNoofRequests;
+	// printf("totalNoofRequests init: %d\n", totalNoofRequests);
 	noofDistinctDocs 	= max((int) ((1-redundancy) * totalNoofRequests),1);
 	printf("Web #objects = %d, redundancy = %f, totalNoofRequests = %d \n",noofDistinctDocs,redundancy, totalNoofRequests);
 	noofonetimers 		= (int)(onetimerperc*noofDistinctDocs/100.0);
@@ -754,7 +755,12 @@ unsigned int* RequestWebStream::GenerateFileSizes()
 	* 	cerr<<"Lognormal Mean = "<<lognormal_only/lll<<endl;
 	* 	cerr<<"All Mean = "<<all/noofDistinctDocs<<"\nExpected mean = "<<efzm<<endl;
 	*/
-
+	// 我们这里强行把文件大小给它改掉
+	for (int i = 0; i < noofDistinctDocs; i++) {
+		filesizes[i] = 53687; // 即 1GB/2w 
+		// filesizes[i] = 10737; // 即 1GB/10w 
+		// filesizes[i] = 107374; // 即 1GB/5w 
+	}
 	return filesizes;
 }
 
@@ -908,7 +914,7 @@ void RequestWebStream::GenerateAllRequests()
 
 	//open the request stream file for writing
 	FILE *fp = fopen(requestStreamFile, "w");
-
+	printf("totalNoofRequests: %d\n", totalNoofRequests);
 	while (totalReqGenerated < totalNoofRequests)
 	{
 		randNum = erand48(seed);
@@ -1159,7 +1165,7 @@ void RequestOtherStream::GenerateAllRequests()
 void RequestWebStream::GenerateUniqueDocs(Node* popCDF, int noofItems1,
  Node* sizeCDF, int noofItems2)
 {
-
+	printf("\ttotalNoofRequests GenerateUniqueDocs init: %d\n", totalNoofRequests);
 	uniqueDoc = new Request*[noofDistinctDocs];
 	if (uniqueDoc == NULL)
 	{
@@ -1176,6 +1182,7 @@ void RequestWebStream::GenerateUniqueDocs(Node* popCDF, int noofItems1,
 	short unsigned int seed[] 	= {rand1, rand2, rand3}; //{5, 7, 9};
 	unsigned int total 			= 0;
 	int corr 					= get_correlation(correlation, noofDistinctDocs);
+	// printf("correlation: %d\n", corr);
 
 	if (corr < 0) 
 	{
@@ -1194,11 +1201,11 @@ void RequestWebStream::GenerateUniqueDocs(Node* popCDF, int noofItems1,
 		while (count < noofDistinctDocs)
 		{
 			filesize = FindValue(sizeCDF, noofItems2, erand48(seed));
-			if ((filesize < 10*1024) || (uniqueDoc[count]->GetFreq() < 100))
-			{
+			// if ((filesize < 10*1024) || (uniqueDoc[count]->GetFreq() < 100))
+			// {
 				uniqueDoc[count]->SetFileSize(filesize);
 				count++;
-			}
+			// }
 		}
 	}
 	else
@@ -1244,12 +1251,14 @@ void RequestWebStream::GenerateUniqueDocs(Node* popCDF, int noofItems1,
 	// We have to sort them first in descending order of popularity
 	qsort(uniqueDoc, noofDistinctDocs, sizeof(Request*), (int(*)(const void *, const void *))compare2);
 
-	if ((totalNoofRequests - total) != 0)
+	printf("\ttotal 1: %d\n", total);
+
+	if ((totalNoofRequests - total) > 0)
 	{
 		float scalingFactor = (float)(totalNoofRequests - noofonetimers)/(total - noofonetimers);
 		total 				= noofonetimers; //recalculate total noof requests
 
-		for (int i=0; i < noofDistinctDocs - noofonetimers; i++)
+		for (int i=0; i < noofDistinctDocs - noofonetimers; i++) // 对于非一次性请求的内容, 增加请求数量
 		{
 			//int freq  = (int)(uniqueDoc[i]->GetFreq() * scalingFactor);
 			int freq = floorf(uniqueDoc[i]->GetFreq() * scalingFactor + 0.5);
@@ -1260,8 +1269,49 @@ void RequestWebStream::GenerateUniqueDocs(Node* popCDF, int noofItems1,
 				uniqueDoc[i]->SetFreq(freq);
 
 			total += freq;
+			if (total == totalNoofRequests)
+				break;
+		}
+	} 
+	else if ((totalNoofRequests - total) < 0)
+	{
+		float scalingFactor = (float)(totalNoofRequests - noofonetimers)/(total - noofonetimers);
+		total 				= noofonetimers; //recalculate total noof requests
+
+		for (int i=0; i < noofDistinctDocs - noofonetimers; i++) // 对于非一次性请求的内容, 增加请求数量
+		{
+			//int freq  = (int)(uniqueDoc[i]->GetFreq() * scalingFactor);
+			int freq = floorf(uniqueDoc[i]->GetFreq() * scalingFactor - 0.5);
+			uniqueDoc[i]->SetFreq(freq);
+			total += freq;
+			if (total == totalNoofRequests)
+				break;
 		}
 	}
+
+	printf("\ttotal 2: %d\n", total);
+
+	// 强制让它相等, 随机选一个对象，把请求分配到它上面去（不准确，但是对结果基本没有影响）
+	int lackNoofRequests = totalNoofRequests - total;
+	int noofReuseDocs = noofDistinctDocs - noofonetimers;
+	srand(static_cast<unsigned>(time(0))); 
+	if (lackNoofRequests > 0) {
+		for (int j = 0; j < lackNoofRequests; j++) {
+			int randDoc = rand() %  noofReuseDocs;
+			int freq = uniqueDoc[randDoc]->GetFreq();
+			uniqueDoc[randDoc]->SetFreq(freq+1);
+			total += 1;
+		}
+	} else {
+		for (int j = 0; j < lackNoofRequests; j++) {
+			int randDoc = rand() %  noofReuseDocs;
+			int freq = uniqueDoc[randDoc]->GetFreq();
+			uniqueDoc[randDoc]->SetFreq(freq-1);
+			total -= 1;
+		}
+	}
+	
+	printf("\ttotal 3: %d\n", total);
 
 	// Assign the file ids now starting from 0
 	for (int i=0; i< noofDistinctDocs; i++)
@@ -1275,6 +1325,7 @@ void RequestWebStream::GenerateUniqueDocs(Node* popCDF, int noofItems1,
 	}
 
 	totalNoofRequests = total; //this is the new total noof requests that will be generated
+	printf("\ttotalNoofRequests GenerateUniqueDocs done: %d\n", totalNoofRequests);
 }
 
 
@@ -1715,7 +1766,8 @@ int compare2(Request **x, Request **y) //reverse sorting
  * generate the request stream. Generating a requests stream is done
  * in several stages. Refer to the thesis to understand how
  */ 
-void RequestWebStream::GenerateRequestStream()
+void RequestWebStream::
+GenerateRequestStream()
 {
 
 	// First generate a set of popularities for the number of distinct files in the

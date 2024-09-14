@@ -51,13 +51,14 @@ int main(int argc, char *argv[])
 	//==================================================================
 	// Initializing basic parameters
 	//==================================================================
-	int trafficType = atoi(argv[1]);
+	int trafficType = atoi(argv[1]); // 1. 流量类型
+	printf("trafficType: %d\n", trafficType);
 	
 
 	//The directory where the ouput will be placed
 	char *dataDir = (char *) malloc(100 * sizeof(char)); 
 	memset(dataDir, 0, 100); 
-	strcpy(dataDir, argv[2]);  //1
+	strcpy(dataDir, argv[2]);  // 2. 输出目录 + data/
 	strcat(dataDir, "data/"); 
 
 	// This file will contain the requests stream to generate. A three-culumn 
@@ -84,30 +85,30 @@ int main(int argc, char *argv[])
 	//100% means one document for all requests
 	//K.Katsaros (10/1/2012): better express it as "Distinct documents"
 	//This has the 1-r value; 
-	float web_redundancy = 1-atof(argv[3]); //3
+	float web_redundancy = 1-atof(argv[3]); //3. 不同对象的比例? 比如1w个请求生成,则有3000个对象
 		
 	// percentage of 1-timers desired out of the distinct documents. For 
 	// proxy workload it is between 50-70%. You are free to set this value 
 	// at whatever value you want of course.
-	float oneTimerPerc = atoi(argv[4]);  //4
+	float oneTimerPerc = atoi(argv[4]);  //4. 和参数3相关吗? 3000个对象里有70%是一次性内容
 	
 	// this is the desired Zipf slope of the workload, usually within 0 and 1.0
-	float webZipfSlope = atof(argv[5]);  //5
+	float webZipfSlope = atof(argv[5]);  //5. 即zipf偏斜参数
 	
 	// the heavy tail index of the workload, usually within 0 and 2.0
-	float paretoTailIndex = atof(argv[6]);  //6
+	float paretoTailIndex = atof(argv[6]);  //6. TODO: 重尾指数???
 
 	// This allows correlation to be introduced between popularity and file size. 
 	// A value of 0 will introduce the normal close-to-zero correlation. Set 
 	// this value at -1 if you want negative correllation, or 1 if you want 
 	// positive correlation. Note that the correlation introduced will not 
 	// be exactly 0, -1, or 1, but will be close in each case.
-	float correlation = atof(argv[7]);  //7
+	float correlation = atof(argv[7]);  //7. 流行度和文件大小的相关性
 
 	// This is the size of the LRU stack used to introduce temporal locality. 
 	// Larger values will be take 
 	// more computational time due to movement of elements of the stack.
-	unsigned int stacksize = atoi(argv[8]);  //8
+	unsigned int stacksize = atoi(argv[8]);  //8. 用于引入时间局部性的LRU堆栈的大小, TODO: 不同大小的影响?
 
 	// There are two stack modes used to introduce temporal locality: Static 
 	// and Dynamic. If you want static 
@@ -116,7 +117,7 @@ int main(int argc, char *argv[])
 	// locality than dynamic. The dynamic is more representative of 
 	// empirical ones. So, to mimic an empirical
 	// workload, use dynamic.
-	unsigned int stackmode = atoi(argv[9]);  //9
+	unsigned int stackmode = atoi(argv[9]);  //9. LRU堆栈模式: 0 静态, 1 动态
 	
 	// this file wil and 
 	// the second column is the file size. The first column of the two 
@@ -130,9 +131,11 @@ int main(int argc, char *argv[])
 
 	// this is the percentage of documents at the tail of the file size 
 	// distribution, out of the distinct  documents
+	// 10. 文件大小分布的尾部的对象所占的百分比。
 	float percAtTail = atof(argv[10]); //SIGMETRICS'98 value: 7;	//WebTraff value: 20;
 
 	//the beginning of the tail 
+	// 11. TODO: 尾部的开端???
 	float K =  atof(argv[11]);   //SIGMETRICS'98 value: 133*1024; OR 9300 (Bestavros)	//WebTraff value: 10000;
 
 	// this is the mean and standard deviation of the lognormal values used to 
@@ -140,6 +143,8 @@ int main(int argc, char *argv[])
 	// an empirical workload and the file size distribution does not match very 
 	// well, you might need to adjust these values, otherwise these values seem 
 	// to work okay.
+	// 12. 用于对文件大小分布body进行建模的对数正态值的平均值
+	// 13. 标准差
 	float mean =  atof(argv[12]); //SIGMETRICS'98 value: 9357;		//WebTraff value: 7000;
 	float std = atof(argv[13]);  //SIGMETRICS'98 value: 1318;  		//WebTraff value: 11000;
 
@@ -173,9 +178,9 @@ int main(int argc, char *argv[])
 	float other_redundancy = 1-atof(argv[33]);		//Default value = 0.5
 	float other_size = atof(argv[34])*1024;				//Default value = 5 KB
 	
-	int video_pop_distr = atoi(argv[35]);
+	int video_pop_distr = atoi(argv[35]);		// TODO: ???
 	float otherZipfSlope  = atof(argv[36]);		//Default value: 0.7
-	int p2p_fixed_object_size = atoi(argv[37]); //When using samples: -1, else default: 650MB
+	int p2p_fixed_object_size = atoi(argv[37]); //When using samples: -1, else default: 650MB, 实际下面就是用的默认值
 	bool fixedP2PSize = false;
 	//==================================================================
 
@@ -192,7 +197,7 @@ int main(int argc, char *argv[])
     float logNormalMedian = exp(paramMean);
 
 	
-	float quantile = 0.5+percAtTail/100;
+	float quantile = 0.5+percAtTail/100; // 分位数?
 	
 	float web_median_object_size = -1;
 	
@@ -256,13 +261,17 @@ int main(int argc, char *argv[])
 	
 	
 	float web_traffic_size = web_perc*workloadSize;
-	float p2p_traffic_size = p2p_perc*workloadSize; printf("p2p_traffic_size = %f MB\n",p2p_traffic_size/(1024*1024));
+	float p2p_traffic_size = p2p_perc*workloadSize; l
+	printf("p2p_traffic_size = %f MB\n",p2p_traffic_size/(1024*1024));
 	float video_traffic_size = video_perc*workloadSize;
 	float other_traffic_size = other_perc*workloadSize;
 	
 	//Using the meadian, as the mean value will produce less objects in 
 	//heavy tail object size cases (e.g., web)
-	long numWebRequests = web_traffic_size/web_median_object_size;
+	// long numWebRequests = web_traffic_size/web_median_object_size;
+	long numWebRequests = web_traffic_size / 53687 ; // 直接在这里写死web请求的数量,1GB, 假设1GB对应2w个请求
+	// long numWebRequests = web_traffic_size / 10737 ; // 直接在这里写死web请求的数量,1GB, 假设1GB对应10w个请求
+	// long numWebRequests = web_traffic_size / 107374 ; // 直接在这里写死web请求的数量,1GB, 假设1GB对应1w个请求
 	long numP2PRequests = p2p_traffic_size/p2p_median_object_size;
 	long numVideoRequests = video_traffic_size/expected_video_size_mean;
 	long numOtherRequests = other_traffic_size/other_median_object_size;
@@ -277,7 +286,7 @@ int main(int argc, char *argv[])
 	printf("\nTotal request traffic (1KB/request)= %d  MB\n",numTotalRequests/1024);
 	printf("===================================================\n");
 		
-	float web_other_rel = (float)numWebRequests/numOtherRequests;
+	// float web_other_rel = (float)numWebRequests/numOtherRequests;
 	//cerr<<"==================================================="<<endl;
 	//cerr<<"Workload size:  "<<argv[26]<<" GB, "<<"Total#requests: "<<<<endl;
 	//cerr<<"    Web % = "<<(float)numWebRequests/numTotalRequests*100<<"%, "<<numWebRequests/1024<<" MB"<<endl;
@@ -297,19 +306,20 @@ int main(int argc, char *argv[])
 	*/
 	if ((!numWebRequests) || (!numP2PRequests) || (!numVideoRequests) || (!numOtherRequests))
 	{
-		cerr<<"\nOne or more traffic types have zero requests. Please increase the workload size.\n\n"<<endl;
-		exit(0);
+		printf("\nOne or more traffic types have zero requests. Please increase the workload size.\n\n");
+		// cerr<<"\nOne or more traffic types have zero requests. Please increase the workload size.\n\n"<<endl;
+		// exit(0);
 	}
 	
 	//==================================================================
 
 	int nextId = 0;
-	float lastP2PReqTime = 0;
+	// float lastP2PReqTime = 0;
 
 	RequestWebStream*  webWorkload;
-	RequestVideoStream*  videoWorkload;
-	RequestP2PStream*  p2pWorkload;
-	RequestOtherStream* otherWorkload;
+	// RequestVideoStream*  videoWorkload;
+	// RequestP2PStream*  p2pWorkload;
+	// RequestOtherStream* otherWorkload;
 		
 	if (( trafficType == WEB) || ( trafficType == ALL))
 	{
@@ -336,76 +346,76 @@ int main(int argc, char *argv[])
 		delete webWorkload;
 	}
  
-	if (( trafficType == P2P) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB))
-	{
-		p2pWorkload = new RequestP2PStream(requestStreamFile,
-										   statisticsFile,
-										   initMZSlope, 
-										   numP2PRequests, 
-										   p2p_redundancy, 
-										   MZplateau,
-										   tracesTau,
-										   tracesLamda,
-										   torrentInterarrival,
-										   p2p_median_object_size,
-										   nextId, 
-										   distr,
-										   fixedP2PSize);
+	// if (( trafficType == P2P) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB))
+	// {
+	// 	p2pWorkload = new RequestP2PStream(requestStreamFile,
+	// 									   statisticsFile,
+	// 									   initMZSlope, 
+	// 									   numP2PRequests, 
+	// 									   p2p_redundancy, 
+	// 									   MZplateau,
+	// 									   tracesTau,
+	// 									   tracesLamda,
+	// 									   torrentInterarrival,
+	// 									   p2p_median_object_size,
+	// 									   nextId, 
+	// 									   distr,
+	// 									   fixedP2PSize);
 		
-		nextId = nextId+p2pWorkload->LastObjectId() + 1;
+	// 	nextId = nextId+p2pWorkload->LastObjectId() + 1;
 		
-		p2pWorkload->GenerateRequestStream();
+	// 	p2pWorkload->GenerateRequestStream();
 
-		lastP2PReqTime = p2pWorkload->LastObjectReqTime();
-		printf("lastP2PReqTime = %d \n",lastP2PReqTime);
+	// 	lastP2PReqTime = p2pWorkload->LastObjectReqTime();
+	// 	printf("lastP2PReqTime = %d \n",lastP2PReqTime);
 
-		delete p2pWorkload;
-	}
+	// 	delete p2pWorkload;
+	// }
 	
-	if (( trafficType == VIDEO) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
-	{
-		videoWorkload = new RequestVideoStream(requestStreamFile,
-											   statisticsFile,
-											   videoZipfSlope, 
-											   numVideoRequests, 
-											   video_redundancy, 
-											   weibullK,
-											   weibullL,
-											   gammaK,
-											   gamma8,
-											   alpha,
-											   alphaBirth,
-											   nextId, 
-											   distr, 
-											   lastP2PReqTime,
-											   video_pop_distr);
+	// if (( trafficType == VIDEO) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
+	// {
+	// 	videoWorkload = new RequestVideoStream(requestStreamFile,
+	// 										   statisticsFile,
+	// 										   videoZipfSlope, 
+	// 										   numVideoRequests, 
+	// 										   video_redundancy, 
+	// 										   weibullK,
+	// 										   weibullL,
+	// 										   gammaK,
+	// 										   gamma8,
+	// 										   alpha,
+	// 										   alphaBirth,
+	// 										   nextId, 
+	// 										   distr, 
+	// 										   lastP2PReqTime,
+	// 										   video_pop_distr);
 											   
-		nextId = nextId+videoWorkload->LastObjectId() + 1;
+	// 	nextId = nextId+videoWorkload->LastObjectId() + 1;
 
-		videoWorkload->GenerateRequestStream();
+	// 	videoWorkload->GenerateRequestStream();
 		
-		delete videoWorkload;
-	}
+	// 	delete videoWorkload;
+	// }
 		
-	if (( trafficType == OTHER) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
-	{
-		otherWorkload = new RequestOtherStream(requestStreamFile,
-											   statisticsFile,
-											   numOtherRequests, 
-											   other_redundancy,
-											   otherZipfSlope, 
-											   nextId, 
-											   distr, 
-											   lastP2PReqTime,
-											   other_size,
-											   web_other_rel);
+	// if (( trafficType == OTHER) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
+	// {
+	// 	otherWorkload = new RequestOtherStream(requestStreamFile,
+	// 										   statisticsFile,
+	// 										   numOtherRequests, 
+	// 										   other_redundancy,
+	// 										   otherZipfSlope, 
+	// 										   nextId, 
+	// 										   distr, 
+	// 										   lastP2PReqTime,
+	// 										   other_size,
+	// 										   web_other_rel);
 											   
-		nextId = nextId+videoWorkload->LastObjectId() + 1;
+	// 	nextId = nextId+videoWorkload->LastObjectId() + 1;
 
-		otherWorkload->GenerateRequestStream();
+	// 	otherWorkload->GenerateRequestStream();
 		
-		delete otherWorkload;
-	}
+	// 	delete otherWorkload;
+	// }
 	
 	delete distr;
 

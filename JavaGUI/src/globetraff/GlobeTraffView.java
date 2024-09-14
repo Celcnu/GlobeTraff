@@ -1157,7 +1157,7 @@ private void useSamplesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIR
     public static final int P2P_SIZE = 8;
     
 
-    private FloatJSlider size_slider = new FloatJSlider( new FloatJSliderModel(5, 1, 10000, 1 ), true, P2P_SIZE, false );
+    private FloatJSlider size_slider = new FloatJSlider( new FloatJSliderModel(10, 1, 10000, 1 ), true, P2P_SIZE, false );
     
     //Web
     private FloatJSlider web_slope_slider = new FloatJSlider( new FloatJSliderModel( 0.75, 0.0, 1.0, 0.01 ), true, DEFAULT, false );
@@ -1166,7 +1166,7 @@ private void useSamplesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIR
     private FloatJSlider sizepop_slider = new FloatJSlider( new FloatJSliderModel( 0.0, -1.0, 1.0, 0.01 ), true, SIZE_POP_CORR, false );
     private FloatJSlider popbias_slider = new FloatJSlider( new FloatJSliderModel( 0.20, 0.0, 1.0, 0.01 ), true, DEFAULT , false);
     private FloatJSlider stack_slider = new FloatJSlider( new FloatJSliderModel( 100, 0, 1000, 1 ), true, LRU_STACK , false);
-    private FloatJSlider web_redundancy_slider = new FloatJSlider( new FloatJSliderModel( 0.30, 0.0, 1.0, 0.01 ), true, DEFAULT, false );
+    private FloatJSlider web_redundancy_slider = new FloatJSlider( new FloatJSliderModel( 0.50, 0.0, 1.0, 0.01 ), true, DEFAULT, false );
 
     private FloatJSlider web_lognorm_mean_slider = new FloatJSlider( new FloatJSliderModel(9357, 1, 20480, 1 ), true, P2P_SIZE, false );
     private FloatJSlider web_lognorm_std_slider = new FloatJSlider( new FloatJSliderModel(1318, 1, 20480, 1 ), true, P2P_SIZE, false );
