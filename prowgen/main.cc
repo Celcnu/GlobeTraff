@@ -260,41 +260,55 @@ int main(int argc, char *argv[])
 	//float total_traffic_tb = numAS*TB_AS_DAY*pow(1024,2); //pow(1024,4)
 	
 	
+ // 测试命令
+ // ../ProWGen 0 /home/c1c/workspace/GlobeTraff/JavaGUI/ 0.5 70 0.75 1.19 0.0 100 4 7 9300 9357 1318 0.6 20 87.74 1.16 3807 0.66 0.51 6010.0 0.37 23910.0 0.703 2.0164 10 0.35 0.16 0.2 0.29 0.5 0.5 0.5 5.0 0 0.3 -1.0
+
+	printf("total_traffic_size = %ld MB\n", workloadSize/(1024*1024)); // 初始单位是KB
+
 	float web_traffic_size = web_perc*workloadSize;
+	printf("web_traffic_size = %f MB\n",web_traffic_size/(1024*1024));
 	float p2p_traffic_size = p2p_perc*workloadSize;
 	printf("p2p_traffic_size = %f MB\n",p2p_traffic_size/(1024*1024));
 	float video_traffic_size = video_perc*workloadSize;
+	printf("video_traffic_size = %f MB\n",video_traffic_size/(1024*1024));
 	float other_traffic_size = other_perc*workloadSize;
+	printf("other_traffic_size = %f MB\n",other_traffic_size/(1024*1024));
 	
+	// Tips: 通过控制内容项大小调整生成的请求的数量
+	int uniform_object_size = 53687; // 统一内容大小: 1GB对应2w个请求
 	//Using the meadian, as the mean value will produce less objects in 
 	//heavy tail object size cases (e.g., web)
 	// long numWebRequests = web_traffic_size/web_median_object_size;
-	long numWebRequests = web_traffic_size / 53687 ; // 直接在这里写死web请求的数量,1GB, 假设1GB对应2w个请求
+	long numWebRequests = web_traffic_size / uniform_object_size; // 直接在这里写死web请求的数量,1GB, 假设1GB对应2w个请求
 	// long numWebRequests = web_traffic_size / 10737 ; // 直接在这里写死web请求的数量,1GB, 假设1GB对应10w个请求
 	// long numWebRequests = web_traffic_size / 107374 ; // 直接在这里写死web请求的数量,1GB, 假设1GB对应1w个请求
-	long numP2PRequests = p2p_traffic_size/p2p_median_object_size;
-	long numVideoRequests = video_traffic_size/expected_video_size_mean;
-	long numOtherRequests = other_traffic_size/other_median_object_size;
-	long numTotalRequests = numWebRequests+numP2PRequests+numVideoRequests+numOtherRequests;
+	// long numP2PRequests = p2p_traffic_size/p2p_median_object_size;
+	long numP2PRequests = p2p_traffic_size / uniform_object_size;
+	// long numVideoRequests = video_traffic_size/expected_video_size_mean;
+	long numVideoRequests = video_traffic_size / uniform_object_size;
+	// long numOtherRequests = other_traffic_size/other_median_object_size;
+	long numOtherRequests = other_traffic_size / uniform_object_size;
+
+	long numTotalRequests = numWebRequests + numP2PRequests + numVideoRequests + numOtherRequests;
 
 	printf("===================================================\n");
 	printf("Workload size:  %s GB,  Total #requests: %d\n",argv[26],numTotalRequests);
-	printf("    Web:	%ld #req, %f  of total, median size = %f KBs\n",numWebRequests,( float)numWebRequests/numTotalRequests*100, web_median_object_size/1024);
-	printf("    P2P:	%ld #req, %f  of total, median size = %f MBs\n",numP2PRequests,(float)numP2PRequests/numTotalRequests*100, p2p_median_object_size/(1024*1024));
-	printf("    Video:	%ld #req, %f  of total, median size = %f MBs\n",numVideoRequests,(float)numVideoRequests/numTotalRequests*100, expected_video_size_mean/(1024*1024));
-	printf("    Other:	%ld #req, %f  of total, median size = %f KBs\n",numOtherRequests,(float)numOtherRequests/numTotalRequests*100, other_median_object_size/1024);
+	printf("    Web:	%ld #req, %f  of total, median size = %f KBs\n",numWebRequests,( float)numWebRequests/numTotalRequests*100, uniform_object_size/1024);
+	printf("    P2P:	%ld #req, %f  of total, median size = %f KBs\n",numP2PRequests,(float)numP2PRequests/numTotalRequests*100, uniform_object_size/(1024));
+	printf("    Video:	%ld #req, %f  of total, median size = %f KBs\n",numVideoRequests,(float)numVideoRequests/numTotalRequests*100, uniform_object_size/(1024));
+	printf("    Other:	%ld #req, %f  of total, median size = %f KBs\n",numOtherRequests,(float)numOtherRequests/numTotalRequests*100, uniform_object_size/1024);
 	printf("\nTotal request traffic (1KB/request)= %d  MB\n",numTotalRequests/1024);
 	printf("===================================================\n");
 		
-	// float web_other_rel = (float)numWebRequests/numOtherRequests;
-	//cerr<<"==================================================="<<endl;
-	//cerr<<"Workload size:  "<<argv[26]<<" GB, "<<"Total#requests: "<<<<endl;
-	//cerr<<"    Web % = "<<(float)numWebRequests/numTotalRequests*100<<"%, "<<numWebRequests/1024<<" MB"<<endl;
-	//cerr<<"    P2P % = "<<(float)numP2PRequests/numTotalRequests*100<<"%, "<<numP2PRequests/1024<<" MB"<<endl;
-	//cerr<<"    Video % = "<<(float)numVideoRequests/numTotalRequests*100<<"%, "<<numVideoRequests/1024<<" MB"<<endl;
-	//cerr<<"    Other % = "<<(float)numOtherRequests/numTotalRequests*100<<"%, "<<numOtherRequests/1024<<" MB"<<endl;
-	//cerr<<"\nTotal request traffic (1KB/request)= "<<numTotalRequests/(1024)<<" MB\n"<<endl;
-	//cerr<<"===================================================\n"<<endl;
+	float web_other_rel = (float)numWebRequests/numOtherRequests;
+	cerr<<"==================================================="<<endl;
+	cerr<<"Workload size:  "<<argv[26]<<" GB, "<<"Total#requests: "<<endl;
+	cerr<<"    Web % = "<<(float)numWebRequests/numTotalRequests*100<<"%, "<<numWebRequests/1024<<" MB"<<endl;
+	cerr<<"    P2P % = "<<(float)numP2PRequests/numTotalRequests*100<<"%, "<<numP2PRequests/1024<<" MB"<<endl;
+	cerr<<"    Video % = "<<(float)numVideoRequests/numTotalRequests*100<<"%, "<<numVideoRequests/1024<<" MB"<<endl;
+	cerr<<"    Other % = "<<(float)numOtherRequests/numTotalRequests*100<<"%, "<<numOtherRequests/1024<<" MB"<<endl;
+	cerr<<"\nTotal request traffic (1KB/request)= "<<numTotalRequests/(1024)<<" MB\n"<<endl;
+	cerr<<"===================================================\n"<<endl;
 	//	
 	//TODO: test only, remove this...
 	/*
@@ -314,14 +328,14 @@ int main(int argc, char *argv[])
 	//==================================================================
 
 	int nextId = 0;
-	// float lastP2PReqTime = 0;
+	float lastP2PReqTime = 0;
 
 	RequestWebStream*  webWorkload;
-	// RequestVideoStream*  videoWorkload;
-	// RequestP2PStream*  p2pWorkload;
-	// RequestOtherStream* otherWorkload;
+	RequestVideoStream*  videoWorkload;
+	RequestP2PStream*  p2pWorkload;
+	RequestOtherStream* otherWorkload;
 		
-	if (( trafficType == WEB) || ( trafficType == ALL))
+	if (( trafficType == WEB) || ( trafficType == ALL)) // or ALL表示肯定也包含这个类型
 	{
 		webWorkload = new RequestWebStream(requestStreamFile,
 										   statisticsFile,
@@ -346,76 +360,79 @@ int main(int argc, char *argv[])
 		delete webWorkload;
 	}
  
-	// if (( trafficType == P2P) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB))
-	// {
-	// 	p2pWorkload = new RequestP2PStream(requestStreamFile,
-	// 									   statisticsFile,
-	// 									   initMZSlope, 
-	// 									   numP2PRequests, 
-	// 									   p2p_redundancy, 
-	// 									   MZplateau,
-	// 									   tracesTau,
-	// 									   tracesLamda,
-	// 									   torrentInterarrival,
-	// 									   p2p_median_object_size,
-	// 									   nextId, 
-	// 									   distr,
-	// 									   fixedP2PSize);
+	// Note: P2P负载生成非常慢, 可以减少它的数量
+	if (( trafficType == P2P) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB))
+	{
+		p2pWorkload = new RequestP2PStream(requestStreamFile,
+										   statisticsFile,
+										   initMZSlope, 
+										   numP2PRequests, 
+										   p2p_redundancy, 
+										   MZplateau,
+										   tracesTau,
+										   tracesLamda,
+										   torrentInterarrival,
+										  //  p2p_median_object_size,
+											uniform_object_size, // 改成统一大小
+										   nextId, 
+										   distr,
+										   fixedP2PSize);
 		
-	// 	nextId = nextId+p2pWorkload->LastObjectId() + 1;
+		nextId = nextId+p2pWorkload->LastObjectId() + 1;
 		
-	// 	p2pWorkload->GenerateRequestStream();
+		p2pWorkload->GenerateRequestStream();
 
-	// 	lastP2PReqTime = p2pWorkload->LastObjectReqTime();
-	// 	printf("lastP2PReqTime = %d \n",lastP2PReqTime);
+		lastP2PReqTime = p2pWorkload->LastObjectReqTime();
+		printf("lastP2PReqTime = %f \n",lastP2PReqTime);
 
-	// 	delete p2pWorkload;
-	// }
+		delete p2pWorkload;
+	}
 	
-	// if (( trafficType == VIDEO) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
-	// {
-	// 	videoWorkload = new RequestVideoStream(requestStreamFile,
-	// 										   statisticsFile,
-	// 										   videoZipfSlope, 
-	// 										   numVideoRequests, 
-	// 										   video_redundancy, 
-	// 										   weibullK,
-	// 										   weibullL,
-	// 										   gammaK,
-	// 										   gamma8,
-	// 										   alpha,
-	// 										   alphaBirth,
-	// 										   nextId, 
-	// 										   distr, 
-	// 										   lastP2PReqTime,
-	// 										   video_pop_distr);
+	if (( trafficType == VIDEO) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
+	{
+		videoWorkload = new RequestVideoStream(requestStreamFile,
+											   statisticsFile,
+											   videoZipfSlope, 
+											   numVideoRequests, 
+											   video_redundancy, 
+											   weibullK,
+											   weibullL,
+											   gammaK,
+											   gamma8,
+											   alpha,
+											   alphaBirth,
+											   nextId, 
+											   distr, 
+											   lastP2PReqTime,
+											   video_pop_distr);
 											   
-	// 	nextId = nextId+videoWorkload->LastObjectId() + 1;
+		nextId = nextId+videoWorkload->LastObjectId() + 1;
 
-	// 	videoWorkload->GenerateRequestStream();
+		videoWorkload->GenerateRequestStream();
 		
-	// 	delete videoWorkload;
-	// }
+		delete videoWorkload;
+	}
 		
-	// if (( trafficType == OTHER) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
-	// {
-	// 	otherWorkload = new RequestOtherStream(requestStreamFile,
-	// 										   statisticsFile,
-	// 										   numOtherRequests, 
-	// 										   other_redundancy,
-	// 										   otherZipfSlope, 
-	// 										   nextId, 
-	// 										   distr, 
-	// 										   lastP2PReqTime,
-	// 										   other_size,
-	// 										   web_other_rel);
+	if (( trafficType == OTHER) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
+	{
+		otherWorkload = new RequestOtherStream(requestStreamFile,
+											   statisticsFile,
+											   numOtherRequests, 
+											   other_redundancy,
+											   otherZipfSlope, 
+											   nextId, 
+											   distr, 
+											   lastP2PReqTime,
+											  //  other_size,
+												uniform_object_size, // 改成统一大小
+											   web_other_rel);
 											   
-	// 	nextId = nextId+videoWorkload->LastObjectId() + 1;
+		nextId = nextId+videoWorkload->LastObjectId() + 1;
 
-	// 	otherWorkload->GenerateRequestStream();
+		otherWorkload->GenerateRequestStream();
 		
-	// 	delete otherWorkload;
-	// }
+		delete otherWorkload;
+	}
 	
 	delete distr;
 

@@ -773,14 +773,13 @@ unsigned int* RequestP2PStream::GenerateFileSizes()
 
 	for (unsigned int i =0; i<noofDistinctDocs; i++)
 	{
-		if (!fixedP2PSize) {
-			filesizes[i] = SampleFileSize()*1024*1024;//p2p_size_median; //In Bytes
-		}
-		else {
-			filesizes[i] = p2p_size_median;
-		}
+		// if (!fixedP2PSize) {
+		// 	filesizes[i] = SampleFileSize()*1024*1024;//p2p_size_median; //In Bytes
+		// }
+		// else {
+			filesizes[i] = p2p_size_median; // 设置成统一大小
+		// }
 	}
-
   return filesizes;
 }
 
@@ -846,7 +845,8 @@ unsigned int* RequestVideoStream::GenerateFileSizes()
 			length = distributions->Normal(mean, std);
 
 
-		filesizes[i] = (int)(length*330*1024)/8; // length*Kbps -> bytes; //In Bytes
+		// filesizes[i] = (int)(length*330*1024)/8; // length*Kbps -> bytes; //In Bytes
+		filesizes[i] = 53687; // 改成统一大小
 	}
 
   return filesizes;
@@ -914,7 +914,7 @@ void RequestWebStream::GenerateAllRequests()
 
 	//open the request stream file for writing
 	FILE *fp = fopen(requestStreamFile, "w");
-	printf("totalNoofRequests: %d\n", totalNoofRequests);
+	printf("\ttotalNoofRequests: %d\n", totalNoofRequests);
 	while (totalReqGenerated < totalNoofRequests)
 	{
 		randNum = erand48(seed);
@@ -1857,6 +1857,7 @@ void RequestP2PStream::GenerateRequestStream()
 	// K.Katsaros, 28/04/2011: shall consider using a distribution...
 	printf("\tGenerating starting file sizes...\n");
 	unsigned int *filesizes = GenerateFileSizes();
+	// printf("\tFinish generating starting file sizes...\n");
 
 	printf("\tGenerating CDF for file sizes...\n");
 	int noofElement2; //the total no of elements in CDF values
@@ -2047,12 +2048,8 @@ int get_correlation(float corr, int size) {
 unsigned int RequestP2PStream::SampleFileSize()
 {
 	unsigned int filesize = 0;
-	string tmp_cmd_buff = "pwd";
-	system(tmp_cmd_buff.c_str());
-	
-	tmp_cmd_buff = "pwd";
-	system(tmp_cmd_buff.c_str());
-	
+	// string tmp_cmd_buff = "pwd";
+	// system(tmp_cmd_buff.c_str());	
 	
 	ostringstream o (ostringstream::out);
 	o<<"./sampleBTFileSizes/sampleTorrentFileSize";
