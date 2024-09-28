@@ -299,6 +299,8 @@ class RequestOtherStream {
    
 
     void GenerateRequestStream(); //This is the main method called from main.cc
+
+    float LastObjectReqTime();
 	
  private:
     unsigned int* GeneratePopularities(); //generates a list of popularities
@@ -309,8 +311,8 @@ class RequestOtherStream {
     
 	void  GenerateUniqueDocs(Node* popCDF, int noofItems1, Node* sizeCDF, int noofItems2);
 
-    void GenerateAllRequests(); //this will generate the requests into a file specified in main.cc
-
+    // void GenerateAllRequests(); //this will generate the requests into a file specified in main.cc
+    void GenerateAllRequests();
     unsigned int firstId;
     char* requestStreamFile; 	//the final output file containing the requests
     char* statisticsFile;    	//some statistics about the generated stream(pop and file size of unique docs)
@@ -323,6 +325,7 @@ class RequestOtherStream {
     Request **uniqueDoc;  // the unique files in the workload
     Distributions* distributions;
     float web_other_rel; //Used to adjust the arrival rate of the requests
+    float lastObjectReqTime = 0;
 };
 
 

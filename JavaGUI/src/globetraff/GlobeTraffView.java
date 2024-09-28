@@ -1157,7 +1157,7 @@ private void useSamplesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIR
     public static final int P2P_SIZE = 8;
     
 
-    private FloatJSlider size_slider = new FloatJSlider( new FloatJSliderModel(10, 1, 10000, 1 ), true, P2P_SIZE, false );
+    private FloatJSlider size_slider = new FloatJSlider( new FloatJSliderModel(1, 1, 10, 1 ), true, P2P_SIZE, false ); // 总大小
     
     //Web
     private FloatJSlider web_slope_slider = new FloatJSlider( new FloatJSliderModel( 0.75, 0.0, 1.0, 0.01 ), true, DEFAULT, false );
@@ -1178,7 +1178,8 @@ private void useSamplesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIR
     private FloatJSlider mz_plateau_slider = new FloatJSlider( new FloatJSliderModel( 20, 0, 100, 1 ), true, MZ_PLATEAU, false );
     private FloatJSlider p2p_tau_slider = new FloatJSlider( new FloatJSliderModel( 87.74, 1.0, 100.0, 0.01 ), true, ED , false);
     private FloatJSlider p2p_lamda_slider = new FloatJSlider( new FloatJSliderModel( 1.1625, 1.0, 100.0, 0.01 ), true, ED, false);
-    private FloatJSlider p2p_birth_slider = new FloatJSlider( new FloatJSliderModel( 3807, 1, 10000, 1 ), true, TORRENT_BIRTH, false );
+    // private FloatJSlider p2p_birth_slider = new FloatJSlider( new FloatJSliderModel( 3807, 1, 10000, 1 ), true, TORRENT_BIRTH, false );
+    private FloatJSlider p2p_birth_slider = new FloatJSlider( new FloatJSliderModel( 380, 1, 10000, 1 ), true, TORRENT_BIRTH, false );
     private FloatJSlider p2p_object_size_slider = new FloatJSlider( new FloatJSliderModel(650, 0, 20480, 1 ), true, P2P_SIZE, true );
     private FloatJSlider p2p_redundancy_slider = new FloatJSlider( new FloatJSliderModel( 0.50, 0.0, 1.0, 0.01 ), true, DEFAULT, false );
     private boolean useSamplesBool = true;

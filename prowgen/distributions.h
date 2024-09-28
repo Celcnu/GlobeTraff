@@ -12,8 +12,9 @@
 #define ARRIVAL_RATE 1.0         /* Connections per second */
 #define MAX_INT 2147483647       /* Maximum positive integer 2^31 - 1 */
 
-
+// web和other都使用这个请求率
 #define ARRIVAL_RATE 1.0         /* Connections per second */
+// #define ARRIVAL_RATE 10.0 
 #define MAX_INT 2147483647       /* Maximum positive integer 2^31 - 1 */
 
 

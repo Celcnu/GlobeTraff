@@ -360,6 +360,7 @@ int main(int argc, char *argv[])
 		delete webWorkload;
 	}
  
+	// Todo 修正P2P的时间,或者直接不要它了
 	// Note: P2P负载生成非常慢, 可以减少它的数量
 	if (( trafficType == P2P) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB))
 	{
@@ -383,11 +384,35 @@ int main(int argc, char *argv[])
 		p2pWorkload->GenerateRequestStream();
 
 		lastP2PReqTime = p2pWorkload->LastObjectReqTime();
-		printf("lastP2PReqTime = %f \n",lastP2PReqTime);
 
 		delete p2pWorkload;
 	}
 	
+	float lastOtherReqTime = 0.0;	
+	if (( trafficType == OTHER) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
+	{
+		otherWorkload = new RequestOtherStream(requestStreamFile,
+											   statisticsFile,
+											   numOtherRequests, 
+											   other_redundancy,
+											   otherZipfSlope, 
+											   nextId, 
+											   distr, 
+											   lastP2PReqTime, // 这个对它没有用
+											  //  other_size,
+												uniform_object_size, // 改成统一大小
+											   web_other_rel);
+											   
+		nextId = nextId+videoWorkload->LastObjectId() + 1;
+
+		otherWorkload->GenerateRequestStream();
+
+		lastOtherReqTime = otherWorkload -> LastObjectReqTime();
+		
+		delete otherWorkload;
+	}
+
+	// 改成根据other请求的时间范围(它和web请求一致)
 	if (( trafficType == VIDEO) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
 	{
 		videoWorkload = new RequestVideoStream(requestStreamFile,
@@ -403,7 +428,8 @@ int main(int argc, char *argv[])
 											   alphaBirth,
 											   nextId, 
 											   distr, 
-											   lastP2PReqTime,
+											//    lastP2PReqTime,
+											lastOtherReqTime,
 											   video_pop_distr);
 											   
 		nextId = nextId+videoWorkload->LastObjectId() + 1;
@@ -411,27 +437,6 @@ int main(int argc, char *argv[])
 		videoWorkload->GenerateRequestStream();
 		
 		delete videoWorkload;
-	}
-		
-	if (( trafficType == OTHER) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
-	{
-		otherWorkload = new RequestOtherStream(requestStreamFile,
-											   statisticsFile,
-											   numOtherRequests, 
-											   other_redundancy,
-											   otherZipfSlope, 
-											   nextId, 
-											   distr, 
-											   lastP2PReqTime,
-											  //  other_size,
-												uniform_object_size, // 改成统一大小
-											   web_other_rel);
-											   
-		nextId = nextId+videoWorkload->LastObjectId() + 1;
-
-		otherWorkload->GenerateRequestStream();
-		
-		delete otherWorkload;
 	}
 	
 	delete distr;

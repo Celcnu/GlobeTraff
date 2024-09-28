@@ -218,7 +218,7 @@ RequestVideoStream::RequestVideoStream(char* initRequestStreamFile,
 	alpha   			= alpha_val;
 	alphaBirth 			= alphaBirth_val;
 	distributions		= distrib;
-	videoInterArrivalTime 		 = lastP2PReq/noofDistinctDocs;
+	videoInterArrivalTime 		 = lastP2PReq/noofDistinctDocs; // 改成根据web的时间范围
 	videoRequestInterArrivalTime = lastP2PReq/totalNoofRequests;
 	printf("videoRequestInterArrivalTime = %d, lastP2PReq = %d, totalNoofRequests = %d \n",videoRequestInterArrivalTime,lastP2PReq, totalNoofRequests);
 	video_pop_distr		= video_pop_distr_val;
@@ -271,13 +271,19 @@ RequestOtherStream::RequestOtherStream(char* initRequestStreamFile,
 
 	distributions = distrib;
 	otherInterArrivalTime = lastP2PReq/noofDistinctDocs;
-	otherRequestInterArrivalTime = lastP2PReq/totalNoofRequests;
+	otherRequestInterArrivalTime = lastP2PReq/totalNoofRequests; // 后面没使用
 	
 	//TODO: Take the value from GUI...
 	other_size_median = other_size; //1 KB
 	
 	web_other_rel = web_other_rel_val;
 }
+
+float RequestOtherStream::LastObjectReqTime()
+{
+	return lastObjectReqTime;
+}
+
 
 /*
  * RequestWebStream::~RequestWebStream
@@ -881,6 +887,8 @@ void RequestWebStream::GenerateAllRequests()
 	//This part generate references based on static or dynamic models
 	Stack *stack;
 
+	// stackmode = 4
+
 	if (stackmode == 0)  //static model desired
 	{
 		double *cummProb = new double[stacksize];  //do not delete this array, it is passed to the stack class
@@ -927,7 +935,9 @@ void RequestWebStream::GenerateAllRequests()
 
 				Request *req = uniqueDoc[index];
 				fprintf(fp,"%u %u\n", req->GetFileId(),req->GetFileSize());
-
+				// cout <<  req->GetFileId() << ", " << req->GetFileSize() << endl;
+				// 时间是什么时候写入的?
+				
 				// This increment should be substituted with a procedure. See below.
 				totalReqGenerated++;
 				req->DecFreq();
@@ -1006,6 +1016,7 @@ void RequestP2PStream::GenerateAllRequests()
 		float time 		= itemIndex*interTorrentInterval;
 		torrentArrivalOrder.erase(torrentArrivalOrder.begin() + indexIndex);
 
+		// cout << tracesLamda << " " << tau << endl; // 1.16, 87.74
 		double *times = bitTorrentInterarrivalTimes(tracesLamda,tau,tracesSeeding,req->GetFreq());
 
 		for (int k = 0; k < req->GetFreq() ; k++)
@@ -1101,11 +1112,14 @@ void RequestOtherStream::GenerateAllRequests()
 		Request *req = uniqueDoc[itemIndex];
 		
 		time = time + distributions->Exponential(1.0/(ARRIVAL_RATE/web_other_rel));
-		//time += otherRequestInterArrivalTime;
+		// web_other_rel 用于和web保持在同一时间范围!
+		//time += otherRequestInterArrivalTime; // 未使用
 		fprintf(fp,"%f\t%d\t%d\n", time, req->GetFileId(),req->GetFileSize());
 		//printf("generating request for item %d, totalNumRequestsCounter %d",itemIndex,totalNumRequestsCounter);
 		totalNumRequestsCounter--;
 	}
+	if (time > lastObjectReqTime)
+		lastObjectReqTime = time; 
 	
 	//------------------------------------------------------------------
 	/*
@@ -2016,7 +2030,9 @@ RequestOtherStream::GenerateRequestStream()
 	//specified as input to the workload generator. The file has 2 columns: the first column is
 	//the fileId and the second column is the file size.
 	printf("\tGenerating the requests...\n");
+	
 	GenerateAllRequests();
+	// * lastReqTime = lastTime;
 
 	//Now all requests have been generated
 	printf("Done with Other Traffic!\n\n");

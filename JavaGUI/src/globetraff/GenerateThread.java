@@ -199,7 +199,7 @@ public class GenerateThread extends Thread {
                   if (p.waitFor() != 0) {
                       System.err.println("Exit value = " + p.exitValue());
 
-                      //---------------------------
+                      //--------------------------- 
 
                       InputStream inn = p.getErrorStream();
                       BufferedInputStream buff = new BufferedInputStream(inn);
