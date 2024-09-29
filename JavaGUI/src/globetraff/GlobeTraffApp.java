@@ -47,11 +47,11 @@ public class GlobeTraffApp extends SingleFrameApplication {
 
     protected void initializeParameters()
     {
-        
-        setWeb_ratio(35);
-        setP2p_ratio(16);
-        setVideo_ratio(20);
-        setOther_ratio(29);
+        // 这里设置默认值无效
+        setWeb_ratio(25);
+        setP2p_ratio(25);
+        setVideo_ratio(25);
+        setOther_ratio(25);
         setWeb_zipf_slope((float)0.74);
         setWeb_one_timers((float)0.70);
         setWeb_pop_bias((float)0.20);

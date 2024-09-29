@@ -301,6 +301,7 @@ int main(int argc, char *argv[])
 	printf("===================================================\n");
 		
 	float web_other_rel = (float)numWebRequests/numOtherRequests;
+	float web_video_rel = (float)numWebRequests/numVideoRequests;
 	cerr<<"==================================================="<<endl;
 	cerr<<"Workload size:  "<<argv[26]<<" GB, "<<"Total#requests: "<<endl;
 	cerr<<"    Web % = "<<(float)numWebRequests/numTotalRequests*100<<"%, "<<numWebRequests/1024<<" MB"<<endl;
@@ -403,7 +404,8 @@ int main(int argc, char *argv[])
 												uniform_object_size, // 改成统一大小
 											   web_other_rel);
 											   
-		nextId = nextId+videoWorkload->LastObjectId() + 1;
+		// cout << "web-other: " << web_other_rel << endl;	
+		nextId = nextId+otherWorkload->LastObjectId() + 1;
 
 		otherWorkload->GenerateRequestStream();
 
@@ -413,6 +415,9 @@ int main(int argc, char *argv[])
 	}
 
 	// 改成根据other请求的时间范围(它和web请求一致)
+	
+	lastOtherReqTime = 100000.0; // 把它的时间范围写死
+	
 	if (( trafficType == VIDEO) || ( trafficType == ALL) || ( trafficType == ALL_BUT_WEB) )
 	{
 		videoWorkload = new RequestVideoStream(requestStreamFile,
@@ -430,9 +435,10 @@ int main(int argc, char *argv[])
 											   distr, 
 											//    lastP2PReqTime,
 											lastOtherReqTime,
-											   video_pop_distr);
-											   
-		nextId = nextId+videoWorkload->LastObjectId() + 1;
+											   video_pop_distr,
+											   web_video_rel);
+		// cout << "web-video: " << web_video_rel << endl;									   
+		nextId = nextId+otherWorkload->LastObjectId() + 1;
 
 		videoWorkload->GenerateRequestStream();
 		

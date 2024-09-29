@@ -215,7 +215,8 @@ class RequestVideoStream {
 					   unsigned int firstId,
 					   Distributions* distrib,
 					   float lastWebReqTime,
-					   int video_pop_distr);
+					   int video_pop_distr,
+                       float web_video_rel_val);
 	/*	     
     RequestVideoStream(char* initRequestStreamFile,
 		  char* initStatisticsFile, float initZipfSlope,
@@ -277,6 +278,7 @@ class RequestVideoStream {
     float videoRequestInterArrivalTime;
     Distributions* distributions;
     int video_pop_distr;
+    float web_video_rel; //Used to adjust the arrival rate of the requests
 };
 
 class RequestOtherStream {
@@ -301,6 +303,7 @@ class RequestOtherStream {
     void GenerateRequestStream(); //This is the main method called from main.cc
 
     float LastObjectReqTime();
+    int LastObjectId();
 	
  private:
     unsigned int* GeneratePopularities(); //generates a list of popularities

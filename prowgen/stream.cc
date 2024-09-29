@@ -192,7 +192,8 @@ RequestVideoStream::RequestVideoStream(char* initRequestStreamFile,
 									   unsigned int first_ID, 
 									   Distributions* distrib,
 									   float lastP2PReq,
-									   int video_pop_distr_val)
+									   int video_pop_distr_val,
+									   float web_video_rel_val)
 {
 	
 	requestStreamFile = (char *) malloc(100 * sizeof(char));
@@ -222,6 +223,7 @@ RequestVideoStream::RequestVideoStream(char* initRequestStreamFile,
 	videoRequestInterArrivalTime = lastP2PReq/totalNoofRequests;
 	printf("videoRequestInterArrivalTime = %d, lastP2PReq = %d, totalNoofRequests = %d \n",videoRequestInterArrivalTime,lastP2PReq, totalNoofRequests);
 	video_pop_distr		= video_pop_distr_val;
+	web_video_rel = web_video_rel_val;
 }
 
 /*
@@ -284,6 +286,10 @@ float RequestOtherStream::LastObjectReqTime()
 	return lastObjectReqTime;
 }
 
+int RequestOtherStream::LastObjectId()
+{
+	return noofDistinctDocs-1;
+}
 
 /*
  * RequestWebStream::~RequestWebStream
@@ -1012,21 +1018,26 @@ void RequestP2PStream::GenerateAllRequests()
 		float tau 		=   ((float)( (req->GetFreq())/ avgFreq )) * tracesTau;
 
 		int indexIndex 	= distributions->UniformInt(torrentArrivalOrder.size());
-		int itemIndex 	= torrentArrivalOrder.at(indexIndex);
+		int itemIndex 	= torrentArrivalOrder.at(indexIndex);	
 		float time 		= itemIndex*interTorrentInterval;
-		torrentArrivalOrder.erase(torrentArrivalOrder.begin() + indexIndex);
+		// 这里生成的是新的内容的请求的间隔, ok
+		// cout << "index: " << itemIndex << ", inter: " << interTorrentInterval << ", time: " << time << endl;
+		// cout << itemIndex << " " << interTorrentInterval << " " << time << endl;
+		torrentArrivalOrder.erase(torrentArrivalOrder.begin() + indexIndex);	
 
-		// cout << tracesLamda << " " << tau << endl; // 1.16, 87.74
+		// cout << tracesLamda << " " << tau << endl; // 1.16, 87.74	
 		double *times = bitTorrentInterarrivalTimes(tracesLamda,tau,tracesSeeding,req->GetFreq());
-
+		float inittime = time;
 		for (int k = 0; k < req->GetFreq() ; k++)
 		{
 			time = time + times[k];
+			// cout << "\t " << time << endl;
 
 			if (time > lastObjectReqTime)
 				lastObjectReqTime = time;
 
 			fprintf(fp,"%f\t%d\t%d\n", time, req->GetFileId(),req->GetFileSize());
+			// cout << req->GetFileId() << " " << inittime << " " << k << " " << times[k] << " " << time << endl; 
 		}
 	}
 
@@ -1036,46 +1047,99 @@ void RequestP2PStream::GenerateAllRequests()
 /*
  * RequestVideoStream::GenerateAllRequests
  */ 
+// void RequestVideoStream::GenerateAllRequests()
+// {
+// 	srand((unsigned)time(0));
+// 	FILE *fp = fopen(requestStreamFile, "w");
+
+// 	// This vector will be used to draw order indexes for distinct videos.
+// 	// The target is to avoid creating videos in the order of popularity
+// 	// This is usefull in case we choose to use a fixed session inter-arrival
+// 	// time value.
+	
+// 	vector<int> videoArrivalOrder;
+// 	for (int i = 0; i <	noofDistinctDocs; i++)
+// 	{
+// 		videoArrivalOrder.push_back(i);
+// 	}
+	
+// 	for (int i = 0 ; i < noofDistinctDocs ; i++)
+// 	{
+// 		Request *req = uniqueDoc[i];
+
+// 		int indexIndex = distributions->UniformInt(videoArrivalOrder.size()); // 用于随机选择1个视频/内容
+// 		int itemIndex = videoArrivalOrder.at(indexIndex);
+
+// 		float time = itemIndex * videoInterArrivalTime; // 内容间隔时间
+// 		videoArrivalOrder.erase(videoArrivalOrder.begin() + indexIndex); // 避免同一个视频/内容被重复选择
+		
+// 		/*	ALternatively...
+// 		 * 
+// 		 * float time = distributions->ParetoCDF(alphaBirth)*24*3600;
+// 		 *
+// 		 *  */
+		
+// 		float time = distributions->ParetoCDF(alphaBirth)*24*3600;
+
+// 		for (int k = 0; k < req->GetFreq() ; k++) // 获取该内容的请求数, 根据请求间隔时间顺序生成请求
+// 		{
+// 			time = time + videoRequestInterArrivalTime;//distributions->ParetoCDF(alpha)*24*3600;
+// 			fprintf(fp,"%f\t%d\t%d\n", time, req->GetFileId(),req->GetFileSize());
+// 		}
+// 	}
+
+// 	fclose(fp);
+// }
+
+// 请求时间改成指数分布
 void RequestVideoStream::GenerateAllRequests()
 {
-	srand((unsigned)time(0));
-	FILE *fp = fopen(requestStreamFile, "w");
+    srand((unsigned)time(0));
+    FILE *fp = fopen(requestStreamFile, "w");
 
-	// This vector will be used to draw order indexes for distinct videos.
-	// The target is to avoid creating videos in the order of popularity
-	// This is usefull in case we choose to use a fixed session inter-arrival
-	// time value.
-	
-	vector<int> videoArrivalOrder;
-	for (int i = 0; i <	noofDistinctDocs; i++)
-	{
-		videoArrivalOrder.push_back(i);
-	}
-	
-	for (int i = 0 ; i < noofDistinctDocs ; i++)
-	{
-		Request *req = uniqueDoc[i];
+    vector<int> allVideoRequests;
+    int totalNumRequestsCounter = 0;
 
-		int indexIndex = distributions->UniformInt(videoArrivalOrder.size());
-		int itemIndex = videoArrivalOrder.at(indexIndex);
-		float time = itemIndex*videoInterArrivalTime;
-		videoArrivalOrder.erase(videoArrivalOrder.begin() + indexIndex);
-		
-		/*	ALternatively...
-		 * 
-		 * float time = distributions->ParetoCDF(alphaBirth)*24*3600;
-		 *
-		 *  */
+    // 收集所有请求的索引
+    for (int i = 0; i < noofDistinctDocs; i++)
+    {
+        Request *req = uniqueDoc[i];
+        int freq = req->GetFreq();
+        totalNumRequestsCounter += freq;
 
-		for (int k = 0; k < req->GetFreq() ; k++)
-		{
-			time = time + videoRequestInterArrivalTime;//distributions->ParetoCDF(alpha)*24*3600;
-			fprintf(fp,"%f\t%d\t%d\n", time, req->GetFileId(),req->GetFileSize());
-		}
-	}
+        if (freq == 0) {
+            cerr << "ZERO!" << endl;
+            printf("ZERO");
+            exit(1);
+        }
 
-	fclose(fp);
+        for (int l = 0; l < freq; l++)
+        {
+            allVideoRequests.push_back(i);
+        }
+    }
+
+    float time = 0;
+    while (totalNumRequestsCounter > 0)
+    {
+        // 随机选择请求
+        int reqIndex = distributions->UniformInt(totalNumRequestsCounter);
+        int itemIndex = allVideoRequests.at(reqIndex);
+        allVideoRequests.erase(allVideoRequests.begin() + reqIndex);
+        Request *req = uniqueDoc[itemIndex];
+
+        // 使用指数分布生成请求到达时间
+        // time += distributions->Exponential(1.0 / (ARRIVAL_RATE / web_other_rel));
+		time += distributions->Exponential(1.0 / (ARRIVAL_RATE / web_video_rel));
+        
+        // 写入请求信息到文件
+        fprintf(fp, "%f\t%d\t%d\n", time, req->GetFileId(), req->GetFileSize());
+        totalNumRequestsCounter--;
+    }
+
+    fclose(fp);
 }
+
 
 /*
  * RequestOtherStream::GenerateAllRequests

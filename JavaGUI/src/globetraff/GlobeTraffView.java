@@ -570,7 +570,7 @@ public class GlobeTraffView extends FrameView {
         web_slider.setLabelTable(prepareRatioLabels(resourceMap.getFont("web_slider.font")));
         web_slider.setPaintLabels(true);
         web_slider.setPaintTicks(true);
-        web_slider.setValue(35);
+        web_slider.setValue(25); // 设置web默认值
         web_slider.setName("web_slider"); // NOI18N
         web_slider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -600,7 +600,7 @@ public class GlobeTraffView extends FrameView {
         video_slider.setLabelTable(prepareRatioLabels(resourceMap.getFont("video_slider.font")));
         video_slider.setPaintLabels(true);
         video_slider.setPaintTicks(true);
-        video_slider.setValue(20);
+        video_slider.setValue(25); // 设置video默认值
         video_slider.setName("video_slider"); // NOI18N
         video_slider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -615,7 +615,7 @@ public class GlobeTraffView extends FrameView {
         p2p_slider.setLabelTable(prepareRatioLabels(resourceMap.getFont("p2p_slider.font")));
         p2p_slider.setPaintLabels(true);
         p2p_slider.setPaintTicks(true);
-        p2p_slider.setValue(16);
+        p2p_slider.setValue(25); // 设置p2p默认值
         p2p_slider.setName("p2p_slider"); // NOI18N
         p2p_slider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -630,7 +630,7 @@ public class GlobeTraffView extends FrameView {
         other_slider.setLabelTable(prepareRatioLabels(resourceMap.getFont("other_slider.font")));
         other_slider.setPaintLabels(true);
         other_slider.setPaintTicks(true);
-        other_slider.setValue(29);
+        other_slider.setValue(25); // 设置other默认值
         other_slider.setEnabled(false);
         other_slider.setName("other_slider"); // NOI18N
         other_slider.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -1176,10 +1176,15 @@ private void useSamplesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIR
     //P2P
     private FloatJSlider mz_slope_slider = new FloatJSlider( new FloatJSliderModel( 0.6, 0.0, 1.0, 0.01 ), true, DEFAULT , false);
     private FloatJSlider mz_plateau_slider = new FloatJSlider( new FloatJSliderModel( 20, 0, 100, 1 ), true, MZ_PLATEAU, false );
-    private FloatJSlider p2p_tau_slider = new FloatJSlider( new FloatJSliderModel( 87.74, 1.0, 100.0, 0.01 ), true, ED , false);
-    private FloatJSlider p2p_lamda_slider = new FloatJSlider( new FloatJSliderModel( 1.1625, 1.0, 100.0, 0.01 ), true, ED, false);
+    // private FloatJSlider p2p_tau_slider = new FloatJSlider( new FloatJSliderModel( 87.74, 1.0, 100.0, 0.01 ), true, ED , false);
+    // private FloatJSlider p2p_lamda_slider = new FloatJSlider( new FloatJSliderModel( 1.1625, 1.0, 100.0, 0.01 ), true, ED, false);
     // private FloatJSlider p2p_birth_slider = new FloatJSlider( new FloatJSliderModel( 3807, 1, 10000, 1 ), true, TORRENT_BIRTH, false );
-    private FloatJSlider p2p_birth_slider = new FloatJSlider( new FloatJSliderModel( 380, 1, 10000, 1 ), true, TORRENT_BIRTH, false );
+    // 控制衰减速度的时间常数
+    private FloatJSlider p2p_tau_slider = new FloatJSlider( new FloatJSliderModel( 87.74, 1.0, 100.0, 0.01 ), true, ED , false);
+    // 种子的请求的平均到达速率(每小时), 360相当于间隔为10s, (假设把它的时间戳看作ms, 即10ms)
+    private FloatJSlider p2p_lamda_slider = new FloatJSlider( new FloatJSliderModel( 360, 100, 1000, 10 ), true, ED, false);
+    // 新的种子/内容的请求的到达的时间间隔, 10ms
+    private FloatJSlider p2p_birth_slider = new FloatJSlider( new FloatJSliderModel( 10, 1, 100, 1 ), true, TORRENT_BIRTH, false );
     private FloatJSlider p2p_object_size_slider = new FloatJSlider( new FloatJSliderModel(650, 0, 20480, 1 ), true, P2P_SIZE, true );
     private FloatJSlider p2p_redundancy_slider = new FloatJSlider( new FloatJSliderModel( 0.50, 0.0, 1.0, 0.01 ), true, DEFAULT, false );
     private boolean useSamplesBool = true;
@@ -1195,7 +1200,7 @@ private void useSamplesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIR
 
     //Other
     private FloatJSlider other_redundancy_slider = new FloatJSlider( new FloatJSliderModel( 0.50, 0.0, 1.0, 0.01 ), true, DEFAULT, false );
-    private FloatJSlider other_slope_slider = new FloatJSlider( new FloatJSliderModel( 0.3, 0.0, 1.0, 0.01 ), true, DEFAULT , false);
+    private FloatJSlider other_slope_slider = new FloatJSlider( new FloatJSliderModel( 0.75, 0.0, 1.0, 0.01 ), true, DEFAULT , false);
     private FloatJSlider other_object_size_slider = new FloatJSlider( new FloatJSliderModel( 5, 1.0, 100.0, 0.01 ), true, ED, false );
 
     private DirChooser dir_chooser = new DirChooser();
